@@ -1,22 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Player : MonoBehaviour
 {
-    private List<Vector2> _visited = new List<Vector2>();
-    private int[] _board = new int[16*16];
-    private GameObject _currentStone;
+    public static GameObject currentStone;
 
-    public Transform Board;
-    public GameObject whiteStone;
-    public GameObject blackStone;
-
+    public Board board;
     private Camera _camera;
-    private SpriteRenderer _sprite;
-    private Vector2 _pos;
-
-    private int n = 0;
-    private bool isPlay;
+    private Vector2Int _pos;
+    private bool _isPlay;
 
     private void Start()
     {
@@ -25,95 +18,53 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !isPlay)    // 마우스 눌렸을때 투명한 바둑 생성
+        if (Input.GetMouseButtonDown(0) && !_isPlay)    // 마우스 눌렸을때 투명한 바둑 생성
         {
+            // 바둑판 범위 안
             var mousePos = _camera.ScreenToWorldPoint(Input.mousePosition);
-            if ((mousePos.x < 0 || 15 < mousePos.x) || (mousePos.y < 0 || 15 < mousePos.y))
+            if ((mousePos.x < 0 || board.boardSize < mousePos.x) || (mousePos.y < 0 || board.boardSize < mousePos.y))
                 return;
             
             _pos = GetStonePosition();
-            if (IsVisited(_pos))
-                return;
-            Preview();
-        }
-        else if (Input.GetMouseButton(0) && isPlay)    // 마우스 드래그 중에 돌 움직임
-        {
-            _pos = GetStonePosition();
-            if (IsVisited(_pos))
+            if (board.IsVisited(_pos))
                 return;
             
-            _currentStone.transform.position = _pos;
+            board.Preview(_pos);
+            _isPlay = true;
         }
-        else if (Input.GetMouseButtonUp(0) && isPlay)  // 마우스 땠을때 바둑판 위에 돌 위치 시킴
+        else if (Input.GetMouseButton(0) && _isPlay)    // 마우스 드래그 중에 돌 움직임
         {
-            SetStone();
+            _pos = GetStonePosition();
+            if (board.IsVisited(_pos))
+                return;
+            
+            currentStone.transform.position = (Vector3Int)_pos;
+        }
+        else if (Input.GetMouseButtonUp(0) && _isPlay)  // 마우스 땠을때 바둑판 위에 돌 위치 시킴
+        {
+            board.SetStone(currentStone, _pos);
+            _isPlay = false;
         }
     }
 
     /// <summary>
-    /// 마우스 위치(스크린) -> 2차원 좌표 -> 바둑판
+    /// 마우스 위치를 바둑알이 놓일 위치로 변환
     /// </summary>
     /// <returns></returns>
-    private Vector2 GetStonePosition()
+    private Vector2Int GetStonePosition()
     {
         // 마우스 위치 -> 2차원 좌표
         Vector2 pos = _camera.ScreenToWorldPoint(Input.mousePosition);
-        var newPos = pos;
+        Vector2Int newPos = Vector2Int.zero;
         
         // 바둑판 모서리로 이동
-        newPos.x = Mathf.Round(pos.x);
-        newPos.y = Mathf.Round(pos.y);
+        newPos.x = (int)Mathf.Round(pos.x);
+        newPos.y = (int)Mathf.Round(pos.y);
 
         // 바둑판 범위체크
-        newPos.x = Mathf.Clamp(newPos.x, 0, 15);
-        newPos.y = Mathf.Clamp(newPos.y, 0, 15);
+        newPos.x = Mathf.Clamp(newPos.x, 0, board.boardSize);
+        newPos.y = Mathf.Clamp(newPos.y, 0, board.boardSize);
         
         return newPos;
-    }
-
-    // 투명도 변화
-    private Color ChangeAlpha(SpriteRenderer sprite, float a)
-    {
-        var color = sprite.color;
-        color.a = a;
-        sprite.color = color;
-        return color;
-    }
-    
-    // 바둑돌이 놓여 있는지 체크
-    private bool IsVisited(Vector2 pos)
-    {
-        var index = (int)(pos.y * 16 + pos.x);
-        bool result = _board[index] == 1 ? true : false;
-        return result;
-    }
-
-    // 바둑돌 놓기
-    private void SetStone()
-    {
-        // 바둑돌이 놓인 위치를 저장
-        _pos = _currentStone.transform.position;
-        _board[(int)(_pos.y * 16 + _pos.x)] = 1;
-        _visited.Add(_pos);
-        
-        // 바둑돌을 board 자식으로 두기
-        _currentStone.transform.SetParent(Board);
-        
-        _sprite.color = ChangeAlpha(_sprite, 1f);
-        _currentStone = null;
-        isPlay = false;
-    }
-
-    // 바둑돌 놓을 위치 미리보기
-    private void Preview()
-    {
-        if (n++ % 2 == 0)
-            _currentStone = Instantiate(blackStone, _pos, Quaternion.identity);
-        else
-            _currentStone = Instantiate(whiteStone, _pos, Quaternion.identity);
-
-        isPlay = true;
-        _sprite = _currentStone.GetComponent<SpriteRenderer>();
-        _sprite.color = ChangeAlpha(_sprite, 0.6f);
     }
 }

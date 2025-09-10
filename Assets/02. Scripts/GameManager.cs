@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
@@ -8,10 +9,24 @@ public class GameManager : Singleton<GameManager>
     public enum GameResult { Win, Lose, Draw, None }
 
     public Board board;
-
+    private AI _ai;
+    
                                // 우하, 우, 우상, 상
     private int[] _dx = new int[4] { 1, 1, 1, 0 };
     private int[] _dy = new int[4] { -1, 0, 1, 1 };
+
+    private void Start()
+    {
+        _ai = new AI();
+    }
+
+    // public void AITurn()
+    // {
+    //     ChangeTurn();
+    //     var pos = _ai.GetBestMove(board.board);
+    //     Debug.Log($"y : {pos.y} x : {pos.x}");
+    //     Debug.Log($"y : {pos.y} x : {pos.x}");
+    // }
 
     public void ChangeTurn()
     {
@@ -21,7 +36,7 @@ public class GameManager : Singleton<GameManager>
             currentTurn = Turn.PlayerA;
     }
 
-    public GameResult CheckWin(int y, int x)
+    public GameResult CheckWin(int y, int x, int player)
     {
         for (int i = 0; i < 4; i++)
         {
@@ -34,7 +49,7 @@ public class GameManager : Singleton<GameManager>
                 
                 if (nx < 0 || board.boardSize < nx || ny < 0 || board.boardSize < ny)
                     break;
-                if (board.board[ny, nx] != (int)currentTurn)
+                if (board.board[ny, nx] != player)
                     break;
                 count++;
             }
@@ -46,7 +61,7 @@ public class GameManager : Singleton<GameManager>
                 
                 if (nx < 0 || board.boardSize < nx || ny < 0 || board.boardSize < ny)
                     break;
-                if (board.board[ny, nx] != (int)currentTurn)
+                if (board.board[ny, nx] != player)
                     break;
                 count++;
             }

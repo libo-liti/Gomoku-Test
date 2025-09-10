@@ -33,29 +33,30 @@ public class Board : MonoBehaviour
     }
     
     // 바둑돌 놓기
-    public void SetStone(GameObject currentStone, Vector2Int pos)
+    public void SetStone(Vector2Int pos)
     {
         // 바둑돌이 놓인 위치를 저장
         board[pos.y, pos.x] = (int)GameManager.Instance.currentTurn;
         record.Add(pos);
         
         // 바둑돌을 board 자식으로 두기
-        currentStone.transform.SetParent(transform);
+        Player.currentStone.transform.SetParent(transform);
         
         // 바둑돌의 투명도를 원래대로
-        stoneSprite = currentStone.GetComponent<SpriteRenderer>();
+        stoneSprite = Player.currentStone.GetComponent<SpriteRenderer>();
         stoneSprite.color = ChangeAlpha(stoneSprite, 1f);
 
-        switch (GameManager.Instance.CheckWin(pos.y, pos.x))
+        switch (GameManager.Instance.CheckWin(pos.y, pos.x, (int)GameManager.Instance.currentTurn))
         {
             case GameManager.GameResult.Win:
-                Debug.Log((int)GameManager.Instance.currentTurn + " Win");
+                Debug.Log(GameManager.Instance.currentTurn + " Win");
                 break;
             case GameManager.GameResult.Draw:
                 Debug.Log("Draw");
                 break;
         }
         GameManager.Instance.ChangeTurn();
+        // GameManager.Instance.AITurn();
     }
     
     // 투명도 변화

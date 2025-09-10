@@ -265,7 +265,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   record: []
-  boardSize: 16
+  boardSize: 15
   whiteStone: {fileID: 1876935305637760027, guid: 316b0484dab4c544fa5a05f1447715a8, type: 3}
   blackStone: {fileID: 7298403637572606069, guid: 09417ed767c49f6478cb48b60cc47b0e, type: 3}
 --- !u!1 &922011422

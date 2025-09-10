@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(0) && _isPlay)  // 마우스 땠을때 바둑판 위에 돌 위치 시킴
         {
-            board.SetStone(currentStone, _pos);
+            board.SetStone(_pos);
             _isPlay = false;
         }
     }
